@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Torre de Hanoi &mdash; UCS, Gulosa e A*</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+  <header class="cabecalho">
+    <h1>Torre de Hanoi</h1>
+    <p>Comparacao entre Busca de Custo Uniforme, Busca Gulosa e A* &mdash; Trabalho Avaliativo de Inteligencia Artificial</p>
+  </header>
+
+  <main class="conteudo">
+
+    <!-- Painel de controle: escolha do numero de discos e do limite de tempo -->
+    <section class="cartao">
+      <h2>Configuracao</h2>
+
+      <div class="controles">
+        <label class="campo">
+          <span>Numero de discos</span>
+          <select id="campo-discos">
+            <option value="3" selected>3 discos</option>
+            <option value="4">4 discos</option>
+            <option value="5">5 discos</option>
+            <option value="6">6 discos</option>
+            <option value="7">7 discos</option>
+            <option value="8">8 discos</option>
+            <option value="9">9 discos</option>
+            <option value="10">10 discos</option>
+            <option value="11">11 discos</option>
+            <option value="12">12 discos</option>
+          </select>
+        </label>
+
+        <label class="campo">
+          <span>Limite de tempo (s)</span>
+          <input id="campo-limite" type="number" min="1" max="3600" step="1" value="60">
+        </label>
+
+        <button id="botao-executar" class="botao-principal">Executar as tres buscas</button>
+      </div>
+
+      <p class="aviso" id="aviso-otimo">Solucao otima conhecida por formula: 2<sup>n</sup> &minus; 1 = 7 movimentos.</p>
+      <p class="aviso" id="aviso-status"></p>
+    </section>
+
+    <!-- Tabela de resultados exigida pelo relatorio -->
+    <section class="cartao">
+      <h2>Resultados</h2>
+      <div class="rolagem">
+        <table class="tabela" id="tabela-resultados">
+          <thead>
+            <tr>
+              <th>Algoritmo</th>
+              <th>Heuristica</th>
+              <th>Custo</th>
+              <th>Passos</th>
+              <th>Nos expandidos</th>
+              <th>Tempo (s)</th>
+              <th>Animar</th>
+            </tr>
+          </thead>
+          <tbody id="corpo-da-tabela">
+            <tr><td colspan="7" class="vazio">Nenhuma busca executada ainda.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Visualizacao animada da solucao escolhida -->
+    <section class="cartao">
+      <h2>Animacao da solucao</h2>
+
+      <div class="controles">
+        <button id="botao-inicio" class="botao">&#8676; Inicio</button>
+        <button id="botao-anterior" class="botao">&larr; Anterior</button>
+        <button id="botao-tocar" class="botao-principal">&#9654; Tocar</button>
+        <button id="botao-proximo" class="botao">Proximo &rarr;</button>
+
+        <label class="campo">
+          <span>Velocidade (ms por jogada)</span>
+          <input id="campo-velocidade" type="number" min="60" max="3000" step="20" value="450">
+        </label>
+      </div>
+
+      <p class="legenda" id="legenda-jogada">Execute uma busca e escolha um algoritmo na tabela.</p>
+
+      <div class="tabuleiro" id="tabuleiro"></div>
+
+      <div class="barra-de-progresso">
+        <input id="campo-passo" type="range" min="0" max="0" value="0" step="1">
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="rodape">
+    Uma unica funcao de busca em <code>hanoi.py</code>. Os tres algoritmos saem da troca da funcao <code>f</code>.
+  </footer>
+
+  <script src="aplicacao.js"></script>
+</body>
+</html>

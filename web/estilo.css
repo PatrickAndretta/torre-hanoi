@@ -1,0 +1,303 @@
+/* --------------------------------------------------------------------------
+   Estilo da interface da Torre de Hanoi.
+   CSS puro, sem framework, para o trabalho continuar sem dependencias.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --cor-de-fundo: #0f1420;
+  --cor-do-cartao: #182033;
+  --cor-da-borda: #27324a;
+  --cor-do-texto: #e8edf7;
+  --cor-do-texto-fraco: #9aa8c4;
+  --cor-de-destaque: #4f8cff;
+  --cor-de-alerta: #ffb454;
+  --cor-de-sucesso: #46d19a;
+  --raio: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0 0 40px;
+  background: var(--cor-de-fundo);
+  color: var(--cor-do-texto);
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+}
+
+.cabecalho {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--cor-da-borda);
+  background: linear-gradient(180deg, #16203a, var(--cor-de-fundo));
+}
+
+.cabecalho h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+}
+
+.cabecalho p {
+  margin: 0;
+  color: var(--cor-do-texto-fraco);
+  font-size: 14px;
+}
+
+.conteudo {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cartao {
+  background: var(--cor-do-cartao);
+  border: 1px solid var(--cor-da-borda);
+  border-radius: var(--raio);
+  padding: 18px 20px 22px;
+}
+
+.cartao h2 {
+  margin: 0 0 14px;
+  font-size: 17px;
+  color: var(--cor-do-texto);
+}
+
+/* ---------------------------- controles ---------------------------------- */
+
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--cor-do-texto-fraco);
+}
+
+.campo select,
+.campo input {
+  background: #0d1322;
+  color: var(--cor-do-texto);
+  border: 1px solid var(--cor-da-borda);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  min-width: 150px;
+}
+
+.botao,
+.botao-principal {
+  border: 1px solid var(--cor-da-borda);
+  border-radius: 6px;
+  padding: 9px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #202a42;
+  color: var(--cor-do-texto);
+}
+
+.botao-principal {
+  background: var(--cor-de-destaque);
+  border-color: var(--cor-de-destaque);
+  color: #08101f;
+  font-weight: 600;
+}
+
+.botao:hover,
+.botao-principal:hover {
+  filter: brightness(1.12);
+}
+
+.botao:disabled,
+.botao-principal:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.aviso {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--cor-do-texto-fraco);
+}
+
+.aviso.trabalhando {
+  color: var(--cor-de-alerta);
+}
+
+.aviso.erro {
+  color: #ff7a7a;
+}
+
+/* ----------------------------- tabela ------------------------------------ */
+
+.rolagem {
+  overflow-x: auto;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 640px;
+}
+
+.tabela th,
+.tabela td {
+  text-align: left;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--cor-da-borda);
+  white-space: nowrap;
+}
+
+.tabela th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--cor-do-texto-fraco);
+}
+
+.tabela tr.selecionada td {
+  background: #1f2c47;
+}
+
+.tabela .vazio {
+  color: var(--cor-do-texto-fraco);
+  text-align: center;
+}
+
+.marca-otimo {
+  color: var(--cor-de-sucesso);
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+.marca-pior {
+  color: var(--cor-de-alerta);
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+.nao-concluiu {
+  color: var(--cor-de-alerta);
+}
+
+/* --------------------------- tabuleiro ----------------------------------- */
+
+.legenda {
+  margin: 12px 0 4px;
+  font-size: 13px;
+  color: var(--cor-do-texto-fraco);
+  min-height: 20px;
+}
+
+.tabuleiro {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  background: #0d1322;
+  border: 1px solid var(--cor-da-borda);
+  border-radius: var(--raio);
+  padding: 16px 12px 10px;
+  margin-top: 6px;
+}
+
+.pino {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+  min-height: 220px;
+  padding-bottom: 8px;
+}
+
+/* A haste vertical do pino */
+.pino::before {
+  content: "";
+  position: absolute;
+  bottom: 26px;
+  width: 8px;
+  height: 180px;
+  background: #2c3853;
+  border-radius: 4px;
+}
+
+/* A base do pino */
+.pino::after {
+  content: "";
+  position: absolute;
+  bottom: 18px;
+  width: 92%;
+  height: 8px;
+  background: #2c3853;
+  border-radius: 4px;
+}
+
+.pilha {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 3px;
+  padding-bottom: 26px;
+  width: 100%;
+}
+
+.disco {
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0b1020;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset;
+  transition: width 0.15s ease;
+}
+
+.disco.movido {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+.rotulo-do-pino {
+  position: absolute;
+  bottom: 0;
+  font-size: 12px;
+  color: var(--cor-do-texto-fraco);
+  letter-spacing: 1px;
+}
+
+.barra-de-progresso {
+  margin-top: 12px;
+}
+
+.barra-de-progresso input {
+  width: 100%;
+}
+
+.rodape {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+  font-size: 12px;
+  color: var(--cor-do-texto-fraco);
+}
+
+.rodape code {
+  color: var(--cor-de-destaque);
+}
