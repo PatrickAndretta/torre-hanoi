@@ -192,7 +192,10 @@ body {
   color: var(--cor-de-alerta);
 }
 
-/* --------------------------- tabuleiro ----------------------------------- */
+/* --------------------------- tabuleiro 3D -------------------------------- */
+/* A cena e montada com transformacoes 3D do proprio CSS (perspective,
+   rotateX/rotateY/rotateZ e translateZ). Continua sem biblioteca nenhuma.
+   O JavaScript so posiciona os elementos; quem faz a projecao e o navegador. */
 
 .legenda {
   margin: 12px 0 4px;
@@ -201,85 +204,205 @@ body {
   min-height: 20px;
 }
 
+.dica {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--cor-do-texto-fraco);
+  opacity: 0.75;
+}
+
 .tabuleiro {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  background: #0d1322;
+  position: relative;
+  height: 470px;
+  margin-top: 6px;
   border: 1px solid var(--cor-da-borda);
   border-radius: var(--raio);
-  padding: 16px 12px 10px;
-  margin-top: 6px;
+  background: radial-gradient(120% 90% at 50% 12%, #16203a 0%, #0a0f1c 72%);
+  overflow: hidden;
+  /* A camera. As variaveis sao atualizadas pelo arrasto do mouse. */
+  perspective: 1500px;
+  perspective-origin: 50% 36%;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
 }
 
+.tabuleiro.arrastando {
+  cursor: grabbing;
+}
+
+/* O plano do chao. Depois do rotateX, o eixo Z do CSS vira a vertical da cena,
+   entao "subir" um disco e so aumentar o translateZ dele. */
+.cena {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateY(var(--recuo, 96px))
+             rotateX(var(--inclinacao, 62deg))
+             rotateZ(var(--giro, 0deg));
+}
+
+.piso {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 90%;
+  height: 320px;
+  transform: translate(-50%, -50%);
+  border: 1px solid #223049;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(79, 140, 255, 0.10), rgba(79, 140, 255, 0.02)),
+    #101a2c;
+  box-shadow: 0 0 70px rgba(79, 140, 255, 0.10) inset;
+}
+
+/* Cada pino e so um ponto de ancoragem: os filhos se centram nele. */
 .pino {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  position: relative;
-  min-height: 220px;
-  padding-bottom: 8px;
-}
-
-/* A haste vertical do pino */
-.pino::before {
-  content: "";
   position: absolute;
-  bottom: 26px;
-  width: 8px;
-  height: 180px;
-  background: #2c3853;
-  border-radius: 4px;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
 }
 
-/* A base do pino */
-.pino::after {
-  content: "";
+.sombra-do-pino {
   position: absolute;
-  bottom: 18px;
-  width: 92%;
-  height: 8px;
-  background: #2c3853;
-  border-radius: 4px;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 70%);
 }
 
-.pilha {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 3px;
-  padding-bottom: 26px;
-  width: 100%;
+.base-do-pino {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  border: 1px solid #3b4a6b;
+  background: radial-gradient(circle at 42% 38%, #384666 0%, #232f49 62%, #1a2337 100%);
 }
 
+/* A haste e feita de duas placas cruzadas em pe. De qualquer angulo da camera
+   uma das duas aparece, entao o conjunto le como um cilindro. */
+.haste {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 10px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #1c2538, #4a5a80 45%, #26314b);
+}
+
+.topo-da-haste {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #6376a3, #354261);
+}
+
+/* Camada dos discos. Todos moram aqui, ancorados no centro da cena, para
+   poderem viajar de um pino ao outro sem trocar de elemento pai. */
+.camada-de-discos {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+/* O disco e um grupo vazio que carrega a posicao (pino no X, altura no Z);
+   as fatias dentro dele formam a espessura. As fatias de baixo sao mais
+   escuras, o que da o volume. */
 .disco {
-  height: 20px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: #0b1020;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset;
-  transition: width 0.15s ease;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  transform: translate3d(0, 0, 0);
 }
 
-.disco.movido {
-  outline: 2px solid #fff;
-  outline-offset: 1px;
+.fatia {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.30);
+}
+
+.fatia-do-topo {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+    inset 0 0 18px rgba(255, 255, 255, 0.12);
+}
+
+.disco.movido .fatia-do-topo {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 26px rgba(255, 255, 255, 0.45),
+    inset 0 0 18px rgba(255, 255, 255, 0.18);
+}
+
+/* Textos deitados no chao ficam achatados pela inclinacao da camera. O
+   scaleY(--compensacao) desfaz esse achatamento e o rotateZ desfaz o giro. */
+.numero-do-disco {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%)
+             rotateZ(calc(-1 * var(--giro, 0deg)))
+             scaleY(var(--compensacao, 2.1));
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(9, 15, 30, 0.75);
 }
 
 .rotulo-do-pino {
   position: absolute;
-  bottom: 0;
-  font-size: 12px;
+  left: 0;
+  top: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
   color: var(--cor-do-texto-fraco);
-  letter-spacing: 1px;
+}
+
+/* ---------------------------- tela cheia --------------------------------- */
+/* Em tela cheia a secao vira uma coluna e o tabuleiro toma toda a altura que
+   sobrar. O JavaScript remonta a cena com uma escala maior ao entrar e sair. */
+
+#secao-animacao:fullscreen,
+#secao-animacao:-webkit-full-screen {
+  display: flex;
+  flex-direction: column;
+  border: none;
+  border-radius: 0;
+  padding: 22px 30px 26px;
+  background: var(--cor-de-fundo);
+}
+
+#secao-animacao:fullscreen .tabuleiro,
+#secao-animacao:-webkit-full-screen .tabuleiro {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+
+#secao-animacao:fullscreen h2,
+#secao-animacao:-webkit-full-screen h2 {
+  font-size: 20px;
+}
+
+#secao-animacao:fullscreen .legenda,
+#secao-animacao:-webkit-full-screen .legenda {
+  font-size: 16px;
+  color: var(--cor-do-texto);
 }
 
 .barra-de-progresso {

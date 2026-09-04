@@ -71,8 +71,10 @@
       </div>
     </section>
 
-    <!-- Visualizacao animada da solucao escolhida -->
-    <section class="cartao">
+    <!-- Visualizacao animada da solucao escolhida.
+         A secao inteira vai para tela cheia, e nao so o tabuleiro, para os
+         controles continuarem a mao durante a apresentacao. -->
+    <section class="cartao" id="secao-animacao">
       <h2>Animacao da solucao</h2>
 
       <div class="controles">
@@ -85,11 +87,15 @@
           <span>Velocidade (ms por jogada)</span>
           <input id="campo-velocidade" type="number" min="60" max="3000" step="20" value="450">
         </label>
+
+        <button id="botao-tela-cheia" class="botao">&#9974; Tela cheia</button>
       </div>
 
       <p class="legenda" id="legenda-jogada">Execute uma busca e escolha um algoritmo na tabela.</p>
 
       <div class="tabuleiro" id="tabuleiro"></div>
+
+      <p class="dica">Arraste o tabuleiro para girar a camera. Clique duas vezes para voltar ao angulo inicial. Em tela cheia, as setas andam pelas jogadas e a barra de espaco toca ou pausa.</p>
 
       <div class="barra-de-progresso">
         <input id="campo-passo" type="range" min="0" max="0" value="0" step="1">
