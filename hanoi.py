@@ -1,33 +1,12 @@
-# ---------------------------------------------------------------------------
-# Torre de Hanoi - Trabalho Avaliativo de Inteligencia Artificial
-#
-# O trabalho pede tres algoritmos de busca (UCS, Gulosa e A*), mas exige que
-# eles saiam de UMA UNICA funcao de busca. A unica coisa que muda entre eles
-# e a funcao f(no) usada para escolher qual no sai da fronteira:
-#
-#   UCS     -> f(n) = g(n)          (so o custo ja pago)
-#   Gulosa  -> f(n) = h(n)          (so o palpite do que falta)
-#   A*      -> f(n) = g(n) + h(n)   (os dois)
-#
-# A estrutura do codigo e a mesma que usamos no labirinto da Aula 05:
-# o problema e um dicionario com "inicial", "e_objetivo" e "vizinhos", e a
-# busca nao sabe nada sobre Torre de Hanoi.
-# ---------------------------------------------------------------------------
-
 import time
 
-# ---------------------------------------------------------------------------
-# MODELAGEM DO PROBLEMA
-# ---------------------------------------------------------------------------
-# Estado: uma tupla com um pino para cada disco.
-#         O indice da tupla e o numero do disco, sendo 0 o MENOR disco.
-#         O valor guardado e o pino em que aquele disco esta.
-#         Exemplo com 4 discos: (0, 0, 2, 1) significa
-#           disco 0 (o menor) no pino A, disco 1 no pino A,
-#           disco 2 no pino C e disco 3 (o maior) no pino B.
-#
-# Usamos tupla e nao lista porque a tupla e imutavel e, por isso, pode ser
-# usada como chave do dicionario de estados alcancados. Lista daria o erro
+# Estado: uma tupla, onde o índice representa o disco, e o valor representa o pino
+# Exemplo com 4 discos: (0, 0, 2, 1) significa
+# disco 0 (o menor) no pino A, disco 1 no pino A,
+# disco 2 no pino C e disco 3 (o maior) no pino B.
+
+# Usamos tupla e nao lista porque a tupla e imutável e, por isso, pode ser
+# usada como chave do dicionário de estados alcançados. Lista daria o erro
 # "unhashable type" citado no enunciado.
 
 PINOS = (0, 1, 2)
@@ -37,24 +16,27 @@ PINO_DE_ORIGEM = 0   # pino A: onde a torre comeca
 PINO_DE_DESTINO = 2  # pino C: onde a torre precisa terminar
 
 # Limite de tempo adotado pela equipe. Se uma busca passar disso, ela e
-# interrompida e reportada como "nao concluiu", como pede o enunciado.
+# interrompida e reportada como "não concluída", como pede o enunciado.
 LIMITE_DE_TEMPO_EM_SEGUNDOS = 60
 
 
 def estado_inicial(total_de_discos):
-  # Todos os discos empilhados no pino de origem.
+  # Retorna uma tupla onde, se for passado um total de 4 discos, vai retornar (0, 0, 0, 0)
   return tuple(PINO_DE_ORIGEM for _ in range(total_de_discos))
 
+# Essas duas funções percorre um for onde retorna o valor do pino definido anteriormente
 
 def estado_objetivo(total_de_discos):
-  # Todos os discos empilhados no pino de destino.
+  # Retorna uma tupla onde, se for passado um total de 4 discos, vai retornar (2, 2, 2, 2)
   return tuple(PINO_DE_DESTINO for _ in range(total_de_discos))
 
 
 def disco_do_topo(estado, pino):
-  # O disco do topo de um pino e sempre o MENOR disco que esta nele.
-  # Como o indice 0 e o menor disco, basta varrer do inicio e devolver
+  # O disco do topo de um pino é sempre o MENOR disco que está nele.
+  # Como o índice 0 e o menor disco, basta varrer do início e devolver
   # o primeiro que estiver naquele pino.
+  # (0, 0, 2, 1) - pino 1 -> vai percorrer o estado inteiro (3) e se o valor na tupla for igual ao
+  # pino passado, vai retornar aquele índice, que é o menor disco no pino - Aqui vai ser 3
   for disco in range(len(estado)):
     if estado[disco] == pino:
       return disco
@@ -63,8 +45,8 @@ def disco_do_topo(estado, pino):
 
 
 def movimento_e_valido(estado, disco, pino_de_destino):
-  # Um movimento so vale se o pino de destino estiver vazio ou se o disco
-  # que esta no topo dele for MAIOR que o disco que estamos movendo.
+  # Um movimento só vale se o pino de destino estiver vazio ou se o disco
+  # que está no topo dele for MAIOR que o disco que estamos movendo.
   disco_no_destino = disco_do_topo(estado, pino_de_destino)
 
   if disco_no_destino is None:
@@ -72,19 +54,21 @@ def movimento_e_valido(estado, disco, pino_de_destino):
 
   return disco_no_destino > disco
 
-
+# Retorna uma lista de caminhos possíveis a partir daquele estado
 def vizinhos(estado):
-  # Devolve a lista de (novo_estado, custo_da_acao, acao) alcancaveis.
-  # A acao e a tripla (disco, pino de origem, pino de destino), guardada
-  # para conseguirmos imprimir a sequencia de jogadas no final.
+  # Devolve a lista de (novo_estado, custo_da_acao, acao) alcançáveis.
+  # A acao é a tupla (disco, pino de origem, pino de destino), guardada
+  # para conseguirmos imprimir a sequência de jogadas no final.
   saidas = []
 
+  # for (0, 1, 2)
   for origem in PINOS:
     disco = disco_do_topo(estado, origem)
 
     if disco is None:
-      continue  # nao ha o que mover desse pino
+      continue  # não tem disco nesse pino
 
+    # for (0, 1, 2) - se forem iguais, continue, não há motivos para mexer algo do pino A para A
     for destino in PINOS:
       if destino == origem:
         continue
@@ -92,10 +76,14 @@ def vizinhos(estado):
       if not movimento_e_valido(estado, disco, destino):
         continue
 
+      # após fazer todas as verificações, ele transforma o estado (que é uma tupla) em um lista
+      # para poder modificá-la, onde ele vai alterar o pino do disco que está sendo verificado
+      # algo tipo -> (0, 0, 2 ,1) -> [0, 0, 2, 1] -> (1, 0, 2, 1)
       novo_estado = list(estado)
       novo_estado[disco] = destino
 
-      # Custo 1 por movimento, como manda a ficha do problema.
+      # Custo 1 por movimento (padrão)
+      # após criar o novo estado, é adicionado na lista com o novo estado, o custo, e a acao
       saidas.append((tuple(novo_estado), 1, (disco, origem, destino)))
 
   return saidas
@@ -104,24 +92,23 @@ def vizinhos(estado):
 # ---------------------------------------------------------------------------
 # HEURISTICA
 # ---------------------------------------------------------------------------
-# h(n) = quantidade de discos que ainda nao estao no pino de destino.
+# h(n) = quantidade de discos que ainda não estão no pino de destino.
 #
 # Relaxamento: apagamos a regra "nunca coloque um disco maior sobre um menor"
-# E tambem a regra "so se move o disco do topo". Nesse mundo relaxado, cada
-# disco fora do lugar e resolvido com exatamente um movimento, e o custo da
-# solucao relaxada e o numero de discos fora do lugar.
+# E também a regra "só se move o disco do topo". Nesse mundo relaxado, cada
+# disco fora do lugar é resolvido com exatamente um movimento, e o custo da
+# solução relaxada e o número de discos fora do lugar.
 #
-# Admissivel porque no problema real cada disco fora do lugar precisa ser
-# movido pelo menos uma vez, entao h(n) nunca passa do custo real.
-# E uma heuristica FRACA: h(n) vale no maximo n, enquanto a solucao otima
-# custa 2^n - 1. A discussao desse ponto e uma das partes centrais do relatorio.
-
-# A heuristica e consultada muitas vezes por no, entao guardamos o valor ja
-# calculado de cada estado. E so uma otimizacao de desempenho: nao muda o
+# Admissível porque no problema real cada disco fora do lugar precisa ser
+# movido pelo menos uma vez, então h(n) nunca passa do custo real.
+# E uma heurística FRACA: h(n) vale no máximo n, enquanto a solução ótima
+# custa 2^n - 1.
+# A heurística é consultada muitas vezes por no, então guardamos o valor ja
+# calculado de cada estado. É só uma otimização de desempenho: não muda o
 # resultado da busca, apenas evita recontar os discos toda vez.
 CACHE_DA_HEURISTICA = {}
 
-
+# Verifica e adiciona os estados no cache da heuristica
 def heuristica_discos_fora_do_lugar(estado):
   if estado in CACHE_DA_HEURISTICA:
     return CACHE_DA_HEURISTICA[estado]
@@ -135,7 +122,7 @@ def heuristica_discos_fora_do_lugar(estado):
   CACHE_DA_HEURISTICA[estado] = discos_fora
   return discos_fora
 
-
+# Cria o problema a partir do número de discos
 def criar_problema(total_de_discos):
   objetivo = estado_objetivo(total_de_discos)
 
@@ -150,7 +137,8 @@ def criar_problema(total_de_discos):
 # ---------------------------------------------------------------------------
 # A BUSCA (uma so, parametrizada por f)
 # ---------------------------------------------------------------------------
-
+# (0, 0, 2, 1), (nó_pai), (mov para chegar no estado), (custo acumulado), (nesse caso, vai
+# ser o mesmo do custo)
 def criar_no(estado, pai, acao, custo, profundidade):
   return {
     "estado": estado,
@@ -161,11 +149,9 @@ def criar_no(estado, pai, acao, custo, profundidade):
   }
 
 
+# Remove o nó de menor f da fronteira, levando em consideração a heurística utilizada,
+# depois de removido a busca continua a partir dele
 def remover_menor_f(fronteira, f):
-  # Escolhe o no de menor f e o retira da fronteira.
-  # Fizemos a varredura linear de proposito, para o codigo ficar facil de
-  # explicar no seminario. Uma fila de prioridade seria mais rapida, e essa
-  # escolha esta registrada no relatorio.
   indice_menor_f = 0
   menor_valor_de_f = f(fronteira[0])
 
@@ -178,9 +164,9 @@ def remover_menor_f(fronteira, f):
 
   return fronteira.pop(indice_menor_f)
 
-
+# Retorna a lista de estados e ações de um determinado nó até chegar no INICIAL
 def caminho_ate(no):
-  # Sobe pelos pais reconstruindo a sequencia de estados e de acoes.
+  # Sobe pelos pais reconstruindo a sequência de estados e de ações.
   estados = []
   acoes = []
 
@@ -199,7 +185,7 @@ def caminho_ate(no):
 
 
 def busca(problema, f, limite_de_tempo=LIMITE_DE_TEMPO_EM_SEGUNDOS):
-  # Esta e a UNICA funcao de busca do trabalho.
+  # Esta é a UNICA funcao de busca do trabalho.
   # Trocando o f que chega por parametro, ela vira UCS, Gulosa ou A*.
   comeco = time.perf_counter()
 
@@ -275,18 +261,16 @@ def busca(problema, f, limite_de_tempo=LIMITE_DE_TEMPO_EM_SEGUNDOS):
 # AS TRES FUNCOES f
 # ---------------------------------------------------------------------------
 
+# Busca de Custo Uniforme: olha só o custo já pago.
 def f_ucs(no):
-  # Busca de Custo Uniforme: olha so o custo ja pago.
   return no["custo"]
 
-
+# Busca Gulosa: olha só o palpite do que falta.
 def f_gulosa(no):
-  # Busca Gulosa: olha so o palpite do que falta.
   return heuristica_discos_fora_do_lugar(no["estado"])
 
-
+# A*: soma o custo já pago com o palpite do que falta.
 def f_a_estrela(no):
-  # A*: soma o custo ja pago com o palpite do que falta.
   return no["custo"] + heuristica_discos_fora_do_lugar(no["estado"])
 
 
@@ -314,7 +298,7 @@ def descrever_acao(acao):
 
 
 def descrever_estado(estado):
-  # Mostra o conteudo de cada pino, do disco maior (base) para o menor (topo).
+  # Mostra o conteúdo de cada pino, do disco maior (base) para o menor (topo).
   partes = []
 
   for pino in PINOS:
@@ -326,7 +310,7 @@ def descrever_estado(estado):
 
 
 def executar_comparacao(total_de_discos, limite_de_tempo=LIMITE_DE_TEMPO_EM_SEGUNDOS):
-  # Roda os tres algoritmos sobre o mesmo problema e devolve a lista de linhas.
+  # Roda os três algoritmos sobre o mesmo problema e devolve a lista de linhas.
   problema = criar_problema(total_de_discos)
   linhas = []
 
