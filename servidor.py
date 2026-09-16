@@ -20,6 +20,15 @@ PASTA_DA_INTERFACE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "w
 
 PORTA = 8000
 
+NOMES_DOS_PINOS = ("A", "B", "C")
+
+
+def descrever_acao(acao):
+  disco, origem, destino = acao
+  return "mover o disco {} do pino {} para o pino {}".format(
+    disco + 1, NOMES_DOS_PINOS[origem], NOMES_DOS_PINOS[destino]
+  )
+
 # Teto de discos aceito pela interface, para nao travar o navegador esperando.
 MAXIMO_DE_DISCOS = 12
 
@@ -46,7 +55,7 @@ def montar_resposta(total_de_discos, limite_de_tempo):
       resultado["passos"] = linha["passos"]
       resultado["caminho"] = [list(estado) for estado in linha["caminho"]]
       resultado["acoes"] = [list(acao) for acao in linha["acoes"]]
-      resultado["descricoes"] = [hanoi.descrever_acao(acao) for acao in linha["acoes"]]
+      resultado["descricoes"] = [descrever_acao(acao) for acao in linha["acoes"]]
     else:
       resultado["custo"] = None
       resultado["passos"] = None
@@ -60,7 +69,7 @@ def montar_resposta(total_de_discos, limite_de_tempo):
     "discos": total_de_discos,
     "limite": limite_de_tempo,
     "otimo": hanoi.solucao_otima_conhecida(total_de_discos),
-    "nomes_dos_pinos": list(hanoi.NOMES_DOS_PINOS),
+    "nomes_dos_pinos": list(NOMES_DOS_PINOS),
     "resultados": resultados
   }
 

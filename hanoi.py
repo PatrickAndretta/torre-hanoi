@@ -89,9 +89,7 @@ def vizinhos(estado):
   return saidas
 
 
-# ---------------------------------------------------------------------------
 # HEURISTICA
-# ---------------------------------------------------------------------------
 # h(n) = quantidade de discos que ainda não estão no pino de destino.
 #
 # Relaxamento: apagamos a regra "nunca coloque um disco maior sobre um menor"
@@ -134,9 +132,7 @@ def criar_problema(total_de_discos):
   }
 
 
-# ---------------------------------------------------------------------------
-# A BUSCA (uma so, parametrizada por f)
-# ---------------------------------------------------------------------------
+# BUSCA
 # (0, 0, 2, 1), (nó_pai), (mov para chegar no estado), (custo acumulado), (nesse caso, vai
 # ser o mesmo do custo)
 def criar_no(estado, pai, acao, custo, profundidade):
@@ -257,9 +253,7 @@ def busca(problema, f, limite_de_tempo=LIMITE_DE_TEMPO_EM_SEGUNDOS):
   }
 
 
-# ---------------------------------------------------------------------------
 # AS TRES FUNCOES f
-# ---------------------------------------------------------------------------
 
 # Busca de Custo Uniforme: olha só o custo já pago.
 def f_ucs(no):
@@ -281,36 +275,21 @@ ALGORITMOS = [
 ]
 
 
-# ---------------------------------------------------------------------------
-# IMPRESSAO DOS RESULTADOS
-# ---------------------------------------------------------------------------
+# EXECUCAO
+# Este modulo nao roda sozinho: ele so modela o problema e implementa a busca.
+# Quem chama estas funcoes e o servidor.py, que entrega os resultados para a
+# interface grafica desenhar a tabela de metricas e animar a solucao.
 
 def solucao_otima_conhecida(total_de_discos):
   # A Torre de Hanoi tem gabarito exato: 2^n - 1 movimentos.
+  # A interface usa esse valor para conferir se UCS e A* acharam a solucao otima.
   return 2 ** total_de_discos - 1
-
-
-def descrever_acao(acao):
-  disco, origem, destino = acao
-  return "mover o disco {} do pino {} para o pino {}".format(
-    disco + 1, NOMES_DOS_PINOS[origem], NOMES_DOS_PINOS[destino]
-  )
-
-
-def descrever_estado(estado):
-  # Mostra o conteúdo de cada pino, do disco maior (base) para o menor (topo).
-  partes = []
-
-  for pino in PINOS:
-    discos = [disco + 1 for disco in range(len(estado)) if estado[disco] == pino]
-    discos.reverse()
-    partes.append("{}: {}".format(NOMES_DOS_PINOS[pino], discos))
-
-  return "  |  ".join(partes)
 
 
 def executar_comparacao(total_de_discos, limite_de_tempo=LIMITE_DE_TEMPO_EM_SEGUNDOS):
   # Roda os três algoritmos sobre o mesmo problema e devolve a lista de linhas.
+  # Cada linha ja traz as metricas pedidas no enunciado: custo, passos,
+  # nos expandidos e tempo (ou "concluiu = False" se estourou o limite).
   problema = criar_problema(total_de_discos)
   linhas = []
 
@@ -321,88 +300,3 @@ def executar_comparacao(total_de_discos, limite_de_tempo=LIMITE_DE_TEMPO_EM_SEGU
     linhas.append(resultado)
 
   return linhas
-
-
-def imprimir_tabela(total_de_discos, linhas, limite_de_tempo):
-  otimo = solucao_otima_conhecida(total_de_discos)
-
-  print()
-  print("=" * 78)
-  print("TORRE DE HANOI com {} discos".format(total_de_discos))
-  print("Solucao otima conhecida por formula (2^n - 1): {} movimentos".format(otimo))
-  print("Limite de tempo adotado pela equipe: {} s".format(limite_de_tempo))
-  print("=" * 78)
-
-  cabecalho = "{:<10} {:<24} {:>7} {:>8} {:>13} {:>12}".format(
-    "Algoritmo", "Heuristica", "Custo", "Passos", "Expandidos", "Tempo (s)"
-  )
-  print(cabecalho)
-  print("-" * 78)
-
-  for linha in linhas:
-    if linha["concluiu"]:
-      custo = str(linha["custo"])
-      passos = str(linha["passos"])
-      tempo = "{:.4f}".format(linha["tempo"])
-    else:
-      custo = "-"
-      passos = "-"
-      tempo = "nao concluiu em {:.0f}s".format(limite_de_tempo)
-
-    print("{:<10} {:<24} {:>7} {:>8} {:>13} {:>12}".format(
-      linha["algoritmo"], linha["heuristica"], custo, passos,
-      linha["expandidos"], tempo
-    ))
-
-  print("-" * 78)
-
-
-def imprimir_solucao(linha, total_de_discos):
-  # Imprime a sequencia de acoes e de estados da solucao encontrada.
-  if not linha["concluiu"]:
-    print("{}: nao concluiu ({}).".format(linha["algoritmo"], linha["motivo"]))
-    return
-
-  print()
-  print("Solucao encontrada pelo {} ({} movimentos):".format(
-    linha["algoritmo"], linha["passos"]
-  ))
-
-  print("  estado inicial   ->  {}".format(descrever_estado(linha["caminho"][0])))
-
-  for numero, acao in enumerate(linha["acoes"], start=1):
-    estado_depois = linha["caminho"][numero]
-    print("  {:>3}. {:<40} ->  {}".format(
-      numero, descrever_acao(acao), descrever_estado(estado_depois)
-    ))
-
-
-def principal():
-  # Roteiro de teste sugerido pela ficha do problema: 3, 4, 5, 6 e 7 discos.
-  limite_de_tempo = LIMITE_DE_TEMPO_EM_SEGUNDOS
-
-  for total_de_discos in (3, 4, 5, 6, 7):
-    linhas = executar_comparacao(total_de_discos, limite_de_tempo)
-    imprimir_tabela(total_de_discos, linhas, limite_de_tempo)
-
-    # Conferencia com o gabarito: o UCS e o A* devem bater com 2^n - 1.
-    otimo = solucao_otima_conhecida(total_de_discos)
-    for linha in linhas:
-      if linha["concluiu"] and linha["algoritmo"] in ("UCS", "A*"):
-        situacao = "OK" if linha["custo"] == otimo else "DIVERGENTE"
-        print("  conferencia {:<8} custo {:>4} vs otimo {:>4}  [{}]".format(
-          linha["algoritmo"], linha["custo"], otimo, situacao
-        ))
-
-  # Mostra a sequencia de jogadas para uma instancia pequena.
-  print()
-  print("=" * 78)
-  print("SEQUENCIA DE JOGADAS (instancia de 3 discos)")
-  print("=" * 78)
-
-  for linha in executar_comparacao(3, limite_de_tempo):
-    imprimir_solucao(linha, 3)
-
-
-if __name__ == "__main__":
-  principal()
